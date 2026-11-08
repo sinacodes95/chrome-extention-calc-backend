@@ -1,6 +1,6 @@
 # Rust Calculator
 
-A scientific calculator and commercial property investment engine with a JSON command-line interface.
+A scientific calculator and commercial property investment engine with a JSON interface for the command line and WebAssembly.
 
 ## Run locally
 
@@ -16,6 +16,26 @@ printf '%s\n' '{"operation":"evaluate","expression":"sin(30) + log(64, 2) + 5!",
 ```
 
 The CLI reads one UTF-8 JSON request from standard input and writes one JSON response. Rust callers can use `rust_calculator::calculate_json` or the typed functions in the `scientific`, `finance`, and `property` modules.
+
+## Build WebAssembly
+
+```sh
+rustup target add wasm32-unknown-unknown
+cargo build --locked --release --lib --target wasm32-unknown-unknown
+```
+
+Package `target/wasm32-unknown-unknown/release/rust_calculator.wasm` and `web/calculator-wasm.js` together. The loader accepts the module bytes and returns a synchronous function using the same JSON requests and responses as the CLI. In a browser module with both files next to it:
+
+```js
+import { loadCalculator } from './calculator-wasm.js';
+
+const response = await fetch(new URL('./rust_calculator.wasm', import.meta.url));
+const calculateJson = await loadCalculator(await response.arrayBuffer());
+const request = { operation: 'evaluate', expression: '2^3' };
+console.log(JSON.parse(calculateJson(JSON.stringify(request))));
+```
+
+The module runs locally and does not need a service. See the sibling `chrome-extention-property-calc-frontend` repository for the Chrome extension build and installation steps.
 
 ## JSON API
 

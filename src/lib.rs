@@ -4,6 +4,8 @@ mod api;
 pub mod finance;
 pub mod property;
 pub mod scientific;
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+mod wasm;
 
 use std::fmt;
 
